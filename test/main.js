@@ -21,15 +21,20 @@ describe("fixture tests", function() {
             const fixtureDir = path.join(fixturesDir, caseName);
             const actualPath = path.join(fixtureDir, "input.js");
             const actual = injector.inject(dummyFileName, fs.readFileSync(actualPath, "utf-8"), TEST_INTERVAL);
-            const expected = fs.readFileSync(path.join(fixtureDir, "output.js"), "utf-8");
-            const profileWithExpected = profileCode + "\n"+ expected;
-            assert.deepStrictEqual(actual.trim(), profileWithExpected.trim(), actual);
+            const outputPath = path.join(fixtureDir, "output.js");
+            const expected = fs.readFileSync(outputPath, "utf-8");
+            if (process.env.UPDATE === "1") {
+                fs.writeFileSync(outputPath, actual.trim(), "utf-8");
+            } else {
+                const profileWithExpected = profileCode + "\n" + expected;
+                assert.deepStrictEqual(actual.trim(), profileWithExpected.trim(), actual);
+            }
         });
     });
 });
 
-describe("lib/profiler", function(){
-    it("setInterval argument should be SECONDS * 1000", function(){
+describe("lib/profiler", function() {
+    it("setInterval argument should be SECONDS * 1000", function() {
         var sec = 10;
         var body = profiler(sec);
         // wrap as a program
@@ -39,27 +44,29 @@ describe("lib/profiler", function(){
         };
 
         // get the second argument of setInterval
-        estraverse.traverse(ast, { enter: function(node){
-            if(node.type === "CallExpression" && node.callee.name === "setInterval") {
-                var secondArg = node.arguments[1];
-                var rawCode = escodegen.generate(secondArg);
-                assert.equal(eval(rawCode), sec * 1000);
+        estraverse.traverse(ast, {
+            enter: function(node) {
+                if (node.type === "CallExpression" && node.callee.name === "setInterval") {
+                    var secondArg = node.arguments[1];
+                    var rawCode = escodegen.generate(secondArg);
+                    assert.equal(eval(rawCode), sec * 1000);
+                }
             }
-        }});
+        });
     });
 });
 
-describe("lib/injector", function(){
+describe("lib/injector", function() {
     // offset to injected profiling code
     var offsetExpression;
     var dummyFileName = "example.js";
 
-    before(function(){
+    before(function() {
         offsetExpression = profiler(0).length;
     });
 
-    describe("start & end injection", function(){
-        it("sjsp__start in FunctionDeclaration", function(){
+    describe("start & end injection", function() {
+        it("sjsp__start in FunctionDeclaration", function() {
             var fname = "test";
             var source = "function " + fname + "(){}";
             var injected = injector.inject(dummyFileName, source, 0);
@@ -68,7 +75,7 @@ describe("lib/injector", function(){
                 [dummyFileName, 1, 16, fname, source]);
         });
 
-        it("sjsp__end in FunctionDeclaration", function(){
+        it("sjsp__end in FunctionDeclaration", function() {
             var fname = "test";
             var source = "function " + fname + "(){}";
             var injected = injector.inject(dummyFileName, source, 0);
@@ -76,7 +83,7 @@ describe("lib/injector", function(){
             assertCallEnd(ast);
         });
 
-        it("sjsp__start in AnonymousFunction", function(){
+        it("sjsp__start in AnonymousFunction", function() {
             var fname = "anonymous";
             var source = "(function(){})";
             var injected = injector.inject(dummyFileName, source, 0);
@@ -85,7 +92,7 @@ describe("lib/injector", function(){
                 [dummyFileName, 1, 12, fname, source]);
         });
 
-        it("sjsp__end in AnonymousFunction", function(){
+        it("sjsp__end in AnonymousFunction", function() {
             var fname = "anonymous";
             var source = "(function(){})";
             var injected = injector.inject(dummyFileName, source, 0);
@@ -93,7 +100,7 @@ describe("lib/injector", function(){
             assertCallEnd(ast);
         });
 
-        it("sjsp__start in VariableFunction", function(){
+        it("sjsp__start in VariableFunction", function() {
             var fname = "test";
             var source = "var " + fname + " = function(){};";
             var injected = injector.inject(dummyFileName, source, 0);
@@ -103,7 +110,7 @@ describe("lib/injector", function(){
                 [dummyFileName, 1, 22, fname, source]);
         });
 
-        it("sjsp__end in VariableFunction", function(){
+        it("sjsp__end in VariableFunction", function() {
             var fname = "test";
             var source = "var " + fname + " = function(){};";
             var injected = injector.inject(dummyFileName, source, 0);
@@ -112,7 +119,7 @@ describe("lib/injector", function(){
             assertCallEnd(ast);
         });
 
-        it("sjsp__start in MemberFunction", function(){
+        it("sjsp__start in MemberFunction", function() {
             var fname = "a.b.c";
             var source = fname + " = function(){};";
             var injected = injector.inject(dummyFileName, source, 0);
@@ -121,7 +128,7 @@ describe("lib/injector", function(){
                 [dummyFileName, 1, 19, fname, source]);
         });
 
-        it("sjsp__end in MemberFunction", function(){
+        it("sjsp__end in MemberFunction", function() {
             var fname = "a.b.c";
             var source = fname + " = function(){};";
             var injected = injector.inject(dummyFileName, source, 0);
@@ -130,10 +137,10 @@ describe("lib/injector", function(){
         });
     });
 
-    describe("wrapping return statement", function(){
+    describe("wrapping return statement", function() {
         var source, origRetVal, injected, body, returnArg, callee;
 
-        before(function(){
+        before(function() {
             source = "(function(){ return 1+1; })";
             origRetVal = esprima.parse(source).body[0].expression.body.body[0].argument;
 
@@ -143,7 +150,7 @@ describe("lib/injector", function(){
             callee = returnArg.callee;
         });
 
-        it("(...).call(this, arguments)", function(){
+        it("(...).call(this, arguments)", function() {
             assert.equal(returnArg.type, "CallExpression");
             assert.equal(callee.property.name, "call");
 
@@ -152,12 +159,12 @@ describe("lib/injector", function(){
             assert.equal(args[1].name, "arguments");
         });
 
-        it("return (function(arguments){ ...", function(){
+        it("return (function(arguments){ ...", function() {
             var func = callee.object;
             assert.equal(func.params[0].name, "arguments");
         });
 
-        it("return original expression", function(){
+        it("return original expression", function() {
             var body = callee.object.body.body;
 
             assert.equal(body[1].type, "ExpressionStatement");
@@ -172,7 +179,7 @@ describe("lib/injector", function(){
             assert.deepEqual(tmpVarExpr, origRetVal);
         });
 
-        it("call sjsp__end", function(){
+        it("call sjsp__end", function() {
             var func = callee.object;
             var body = func.body.body;
             var expr = body[1].expression;
@@ -188,7 +195,7 @@ describe("lib/injector", function(){
     /*
      * assert start(); injection
      */
-    function assertCallStart(ast, filename, args){
+    function assertCallStart(ast, filename, args) {
         var firstExpr = ast.body[0];
         // assert "var ... = ...;"
         assert.equal(firstExpr.type, "VariableDeclaration");
@@ -200,15 +207,18 @@ describe("lib/injector", function(){
         assert.equal(decl.init.callee.name, "sjsp__start");
         // assert arguments
         assert.deepEqual(
-            decl.init.arguments.map(function(a){ return a.value; }),
+            decl.init.arguments.map(function(a) {
+                return a.value;
+            }),
             args
         );
     }
+
     /*
      * assert end(); injection
      */
-    function assertCallEnd(ast){
-        var lastExpr = ast.body[ast.body.length-1].expression;
+    function assertCallEnd(ast) {
+        var lastExpr = ast.body[ast.body.length - 1].expression;
         // assert "sjsp__end(...)"
         assert.equal(lastExpr.type, "CallExpression");
         assert.equal(lastExpr.callee.name, "sjsp__end");
