@@ -45,7 +45,7 @@ if (!(window || self).hasOwnProperty('sjsp__interval'))
             }
             return 'time: ' + sjsp__print((x.time / 1000).toFixed(2), 7) + 'sec   count: ' + sjsp__print(x.count, 7) + ' ' + sjsp__print(x.fname, 15) + '  ' + sjsp__print(x.name, 13) + '  ' + ' (line:' + sjsp__print(x.line, 4) + ', col:' + sjsp__print(x.col, 3) + ')   ' + x.linestr;
         };
-        var sjsp__result = Object.keys(sjsp__result).map(function (key) {
+        var sjsp__result_count = Object.keys(sjsp__result).map(function (key) {
             return sjsp__result[key];
         }).sort(function (x, y) {
             return y.time - x.time;
@@ -55,11 +55,11 @@ if (!(window || self).hasOwnProperty('sjsp__interval'))
                 time: x.time,
                 count: x.count,
                 name: x.name,
-                line: x.linestr,
-                filePath: filePath
+                filePath: filePath,
+                line: x.linestr
             };
         });
-        console.table(sjsp__result);
+        console.table(sjsp__result_count);
     }, 1 * 1000);
 function fn() {
     var sjsp__state = typeof sjsp__start === 'function' && sjsp__start('example.js', 1, 15, 'fn', 'function fn() {');
