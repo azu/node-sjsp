@@ -22,7 +22,7 @@
     "mocha": "^4.0.1"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha test/main.js"
+    "test": "mocha test/main.js"
   },
   "keywords": [
     "profiler"
