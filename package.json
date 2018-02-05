@@ -1,6 +1,6 @@
 {
   "name": "@azu/node-sjsp",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "Simple JavaScript Profiler in Node.js",
   "preferGlobal": true,
   "repository": {
