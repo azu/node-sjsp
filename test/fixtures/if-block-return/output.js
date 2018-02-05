@@ -6,7 +6,7 @@
     name: ''
 };
 (window || self).sjsp__start = (window || self).sjsp__start || function (fname, line, col, name, linestr) {
-    var key = x.fname + ' :: ' + x.line + ' :: ' + x.col;
+    var key = fname + ' :: ' + line + ' :: ' + col;
     if (window.performance && typeof window.performance.mark === 'function') {
         performance.mark(key);
     }
