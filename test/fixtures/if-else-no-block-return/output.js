@@ -6,7 +6,7 @@
     name: ''
 };
 (window || self).sjsp__start = (window || self).sjsp__start || function (fname, line, col, name, linestr) {
-    var key = fname + ' :: ' + line + ' :: ' + col;
+    var key = fname + '::' + line + '::' + col;
     if (window.performance && typeof window.performance.mark === 'function') {
         performance.mark(key);
     }
@@ -23,11 +23,14 @@
     if (!x.start) {
         return;
     }
-    var key = x.fname + ' :: ' + x.line + ' :: ' + x.col;
+    var key = x.fname + '::' + x.line + '::' + x.col;
     if (window.performance && typeof window.performance.mark === 'function') {
-        window.performance.measure(x.fname || x.linestr, key);
-        performance.clearMarks(key);
-        performance.clearMeasures(x.fname || x.linestr);
+        try {
+            window.performance.measure(x.fname || x.linestr, key);
+            performance.clearMarks(key);
+            performance.clearMeasures(x.fname || x.linestr);
+        } catch (error) {
+        }
     }
     sjsp__result[key] = sjsp__result[key] || {
         count: 0,
