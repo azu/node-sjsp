@@ -12,6 +12,9 @@
     "sjsp": "index.js"
   },
   "dependencies": {
+    "@babel/generator": "^7.0.0-beta.39",
+    "@babel/template": "^7.0.0-beta.39",
+    "@babel/types": "^7.0.0-beta.39",
     "commander": "^2.8.1",
     "escodegen": "^1.6.1",
     "esprima": "^4.0.0",

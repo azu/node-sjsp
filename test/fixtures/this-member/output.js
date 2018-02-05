@@ -6,6 +6,10 @@
     name: ''
 };
 (window || self).sjsp__start = (window || self).sjsp__start || function (fname, line, col, name, linestr) {
+    var key = x.fname + ' :: ' + x.line + ' :: ' + x.col;
+    if (window.performance && typeof window.performance.mark === 'function') {
+        performance.mark(key);
+    }
     return {
         start: Date.now(),
         line: line,
@@ -16,9 +20,15 @@
     };
 };
 (window || self).sjsp__end = (window || self).sjsp__end || function (x) {
-    if (!x.start)
+    if (!x.start) {
         return;
+    }
     var key = x.fname + ' :: ' + x.line + ' :: ' + x.col;
+    if (window.performance && typeof window.performance.mark === 'function') {
+        window.performance.measure(x.fname, key);
+        performance.clearMarks(key);
+        performance.clearMeasures(key);
+    }
     sjsp__result[key] = sjsp__result[key] || {
         count: 0,
         time: 0,
@@ -31,7 +41,7 @@
     sjsp__result[key].time += Date.now() - x.start;
     sjsp__result[key].count += 1;
 };
-if (!(window || self).hasOwnProperty('sjsp__interval'))
+if (!(window || self).hasOwnProperty('sjsp__interval')) {
     (window || self).sjsp__interval = setInterval(function () {
         var sjsp__print = function (x, n) {
             if (!x) {
@@ -61,6 +71,7 @@ if (!(window || self).hasOwnProperty('sjsp__interval'))
         });
         console.table(sjsp__result_count);
     }, 1 * 1000);
+}
 function fn() {
     var sjsp__state = typeof sjsp__start === 'function' && sjsp__start('example.js', 1, 15, 'fn', 'function fn() {');
     this.method = function () {
