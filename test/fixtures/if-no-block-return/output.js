@@ -27,7 +27,7 @@
     if (window.performance && typeof window.performance.mark === 'function') {
         window.performance.measure(x.fname, key);
         performance.clearMarks(key);
-        performance.clearMeasures(key);
+        performance.clearMeasures(x.fname);
     }
     sjsp__result[key] = sjsp__result[key] || {
         count: 0,
