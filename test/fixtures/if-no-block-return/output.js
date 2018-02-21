@@ -78,7 +78,7 @@ if (!(window || self).hasOwnProperty('sjsp__interval')) {
 function fn() {
     var sjsp__state = typeof sjsp__start === 'function' && sjsp__start('example.js', 1, 15, 'fn', 'function fn() {');
     if (true)
-        return function (arguments) {
+        return function () {
             var sjsp__return = 1;
             typeof sjsp__end === 'function' && sjsp__end(sjsp__state);
             return sjsp__return;
